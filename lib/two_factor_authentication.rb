@@ -32,10 +32,10 @@ module Devise
   @@totp_delay = 1.seconds
 
   mattr_accessor :totp_delay_per_attempt
-  @totp_delay_per_attempt = 1.seconds
+  @@totp_delay_per_attempt = 1.seconds
 
   mattr_accessor :totp_delay_max
-  @totp_delay_max = 8.seconds
+  @@totp_delay_max = 8.seconds
 end
 
 module TwoFactorAuthentication
