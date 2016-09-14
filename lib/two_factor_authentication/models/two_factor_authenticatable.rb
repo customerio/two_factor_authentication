@@ -42,7 +42,7 @@ module Devise
           new_timestamp = totp.verify_with_drift_and_prior(code, drift, totp_timestamp)
 
           # Delay after validating to throttle attempts
-          delay = self.class.totp_delay + self.second_factor_attempts_count * self.class.totp_delay_per_attempt
+          delay = self.class.totp_delay + (self.second_factor_attempts_count || 0) * self.class.totp_delay_per_attempt
           sleep [delay, self.class.totp_delay_max].min
 
           return false unless new_timestamp
