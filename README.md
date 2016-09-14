@@ -96,6 +96,9 @@ config.direct_otp_valid_for = 5.minutes  # Time before direct OTP becomes invali
 config.direct_otp_length = 6  # Direct OTP code length
 config.remember_otp_session_for_seconds = 30.days  # Time before browser has to perform 2fA again. Default is 0.
 config.otp_secret_encryption_key = ENV['OTP_SECRET_ENCRYPTION_KEY']
+config.totp_delay = 1.seconds # Delay after validating TOTP (for throttling)
+config.totp_delay_per_attempt = 1.seconds # Extra delay for each attempt
+config.totp_delay_max = 8.seconds # Maximum total delay
 ```
 The `otp_secret_encryption_key` must be a random key that is not stored in the
 DB, and is not checked in to your repo. It is recommended to store it in an

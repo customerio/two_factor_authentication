@@ -27,6 +27,15 @@ module Devise
 
   mattr_accessor :otp_secret_encryption_key
   @@otp_secret_encryption_key = ''
+
+  mattr_accessor :totp_delay
+  @@totp_delay = 1.seconds
+
+  mattr_accessor :totp_delay_per_attempt
+  @totp_delay_per_attempt = 1.seconds
+
+  mattr_accessor :totp_delay_max
+  @totp_delay_max = 8.seconds
 end
 
 module TwoFactorAuthentication

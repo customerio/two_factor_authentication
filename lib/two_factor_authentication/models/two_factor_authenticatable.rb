@@ -16,7 +16,8 @@ module Devise
         ::Devise::Models.config(
           self, :max_login_attempts, :allowed_otp_drift_seconds, :otp_length,
           :remember_otp_session_for_seconds, :otp_secret_encryption_key,
-          :direct_otp_length, :direct_otp_valid_for, :totp_timestamp)
+          :direct_otp_length, :direct_otp_valid_for, :totp_timestamp,
+          :totp_delay, :totp_delay_per_attempt, :totp_delay_max)
       end
 
       module InstanceMethodsOnActivation
@@ -39,6 +40,11 @@ module Devise
           raise "authenticate_totp called with no otp_secret_key set" if totp_secret.nil?
           totp = ROTP::TOTP.new(totp_secret, digits: digits)
           new_timestamp = totp.verify_with_drift_and_prior(code, drift, totp_timestamp)
+
+          # Delay after validating to throttle attempts
+          delay = self.class.totp_delay + resource.second_factor_attempts_count * self.class.totp_delay_per_attempt
+          sleep [delay, self.class.totp_delay_max].min
+
           return false unless new_timestamp
           self.totp_timestamp = new_timestamp
           true
