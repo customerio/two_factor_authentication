@@ -33,7 +33,7 @@ class Devise::TwoFactorAuthenticationController < DeviseController
     end
 
     warden.session(resource_name)[TwoFactorAuthentication::NEED_AUTHENTICATION] = false
-    bypass_sign_in(resource, scope: resource_name)
+    sign_in resource_name, resource, :bypass => true
     set_flash_message :notice, :success
     resource.update_attribute(:second_factor_attempts_count, 0)
 
