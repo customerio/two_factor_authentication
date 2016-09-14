@@ -79,6 +79,10 @@ module Devise
           self.class.max_login_attempts
         end
 
+        def increment_second_factor_attempts_count!
+          self.class.where(id: id).update_all('second_factor_attempts_count = second_factor_attempts_count + 1')
+        end
+
         def totp_enabled?
           respond_to?(:otp_secret_key) && !otp_secret_key.nil?
         end
