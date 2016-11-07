@@ -22,9 +22,20 @@ module Devise
 
       module InstanceMethodsOnActivation
         def authenticate_otp(code, options = {})
+          return true if backup_codes_enabled? && authenticate_backup_code(code)
           return true if direct_otp && authenticate_direct_otp(code)
           return true if totp_enabled? && authenticate_totp(code, options)
           false
+        end
+
+        def authenticate_backup_code(code)
+          return false if backup_codes.empty?
+          backup = backup_codes.find do |c|
+            ActiveSupport::SecurityUtils.secure_compare(c.clear_text,code)
+          end
+          return false if backup.nil?
+          backup.destroy!
+          true
         end
 
         def authenticate_direct_otp(code)
@@ -87,6 +98,10 @@ module Devise
           respond_to?(:otp_secret_key) && !otp_secret_key.nil?
         end
 
+        def backup_codes_enabled?
+          respond_to?(:backup_codes) && !backup_codes.empty?
+        end
+
         def confirm_totp_secret(secret, code, options = {})
           return false unless authenticate_totp(code, {otp_secret_key: secret})
           self.otp_secret_key = secret
@@ -104,6 +119,16 @@ module Devise
             direct_otp: random_base10(digits),
             direct_otp_sent_at: Time.now.utc
           )
+        end
+
+        def create_backup_codes!
+          BackupCode.where(user_id: self.id).destroy_all
+          10.times do
+            BackupCode.create!({
+              user_id: self.id,
+              code: encrypt(ROTP::Base32.random_base32(10))
+            })
+          end
         end
 
         private
@@ -128,6 +153,13 @@ module Devise
 
         def otp_secret_key=(value)
           self.encrypted_otp_secret_key = encrypt(value)
+        end
+
+        def backup_codes
+          BackupCode.where(user_id: self.id).map do |backup|
+            backup.clear_text = decrypt(backup.code)
+            backup
+          end
         end
 
         private

@@ -53,4 +53,5 @@ Devise.add_module :two_factor_authenticatable, :model => 'two_factor_authenticat
 require 'two_factor_authentication/orm/active_record'
 require 'two_factor_authentication/routes'
 require 'two_factor_authentication/models/two_factor_authenticatable'
+require 'two_factor_authentication/models/backup_code'
 require 'two_factor_authentication/rails'
