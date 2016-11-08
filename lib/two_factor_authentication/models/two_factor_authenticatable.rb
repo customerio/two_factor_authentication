@@ -17,12 +17,15 @@ module Devise
           self, :max_login_attempts, :allowed_otp_drift_seconds, :otp_length,
           :remember_otp_session_for_seconds, :otp_secret_encryption_key,
           :direct_otp_length, :direct_otp_valid_for, :totp_timestamp,
-          :totp_delay, :totp_delay_per_attempt, :totp_delay_max)
+          :totp_delay, :totp_delay_per_attempt, :totp_delay_max,
+          :use_backup_codes, :backup_code_length, :backup_code_amount)
       end
 
       module InstanceMethodsOnActivation
         def authenticate_otp(code, options = {})
-          return true if backup_codes_enabled? && authenticate_backup_code(code)
+          if self.class.use_backup_codes && backup_codes_enabled? && authenticate_backup_code(code)
+            return true
+          end
           return true if direct_otp && authenticate_direct_otp(code)
           return true if totp_enabled? && authenticate_totp(code, options)
           false
@@ -122,13 +125,17 @@ module Devise
         end
 
         def create_backup_codes!
-          BackupCode.where(user_id: self.id).destroy_all
-          10.times do
+          destroy_backup_codes
+          self.class.backup_code_amount.times do
             BackupCode.create!({
-              user_id: self.id,
-              code: encrypt(ROTP::Base32.random_base32(10))
+              user_id: id,
+              code: encrypt(ROTP::Base32.random_base32(self.class.backup_code_length))
             })
           end
+        end
+
+        def destroy_backup_codes
+          BackupCode.where(user_id: id).destroy_all
         end
 
         private
@@ -156,9 +163,8 @@ module Devise
         end
 
         def backup_codes
-          BackupCode.where(user_id: self.id).map do |backup|
+          BackupCode.where(user_id: id).each do |backup|
             backup.clear_text = decrypt(backup.code)
-            backup
           end
         end
 
