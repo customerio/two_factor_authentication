@@ -36,6 +36,15 @@ module Devise
 
   mattr_accessor :totp_delay_max
   @@totp_delay_max = 8.seconds
+
+  mattr_accessor :use_backup_codes
+  @@use_backup_codes = false
+
+    mattr_accessor :backup_code_length
+  @@backup_code_length = 10
+
+    mattr_accessor :backup_code_amount
+  @@backup_code_amount = 10
 end
 
 module TwoFactorAuthentication
@@ -53,4 +62,5 @@ Devise.add_module :two_factor_authenticatable, :model => 'two_factor_authenticat
 require 'two_factor_authentication/orm/active_record'
 require 'two_factor_authentication/routes'
 require 'two_factor_authentication/models/two_factor_authenticatable'
+require 'two_factor_authentication/models/backup_code'
 require 'two_factor_authentication/rails'

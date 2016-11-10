@@ -99,6 +99,9 @@ config.otp_secret_encryption_key = ENV['OTP_SECRET_ENCRYPTION_KEY']
 config.totp_delay = 1.seconds # Delay after validating TOTP (for throttling)
 config.totp_delay_per_attempt = 1.seconds # Extra delay for each attempt
 config.totp_delay_max = 8.seconds # Maximum total delay
+config.use_backup_codes = false # Whether to use backup codes or not
+config.backup_code_length = 10 # length of generated codes
+config.backup_code_amount = 10 # number of codes to generate at a time
 ```
 The `otp_secret_encryption_key` must be a random key that is not stored in the
 DB, and is not checked in to your repo. It is recommended to store it in an
